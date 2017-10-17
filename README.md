@@ -2,7 +2,7 @@
 
 [kakoune](http://kakoune.org) plugin to save files that you do not have write permissions for. Uses `sudo` and preserves file ownership and read-write attributes.
 
-## Install
+## Setup
 
 Add `sudo-write.kak` to your autoload dir: `~/.config/kak/autoload/`, or source it manually.
 

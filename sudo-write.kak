@@ -30,7 +30,7 @@ define-command -hidden -params 1 cache-password %{
             delete-buffer
         } catch %{
             delete-buffer
-            throw
+            fail
         }
     }
 }
