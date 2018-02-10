@@ -1,23 +1,20 @@
 # save the current buffer to its file as root
 # (optionally pass the user password to sudo if not cached)
 
-declare-option -hidden str sudo_write_tmp
-
 define-command -hidden sudo-write-impl %{
-    %sh{
-        echo "set-option buffer sudo_write_tmp '$(mktemp --tmpdir XXXXXXXX)'"
+    eval -save-regs f %{
+        set-register f "%sh{ mktemp --tmpdir XXXXX }"
+        write %reg{f}
+        %sh{
+            sudo -- dd if="$kak_reg_f" of="$kak_buffile" >/dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                echo "edit!"
+            else
+                echo "echo -markup '{Error}Something went wrong'"
+            fi
+            rm -f "$kak_opt_sudo_write_tmp"
+        }
     }
-    write %opt{sudo_write_tmp}
-    %sh{
-        sudo -- dd if="$kak_opt_sudo_write_tmp" of="$kak_buffile" >/dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            echo "edit!"
-        else
-            echo "echo -markup '{Error}Something went wrong'"
-        fi
-        rm -f "$kak_opt_sudo_write_tmp"
-    }
-    unset-option buffer sudo_write_tmp
 }
 
 define-command -hidden -params 1 cache-password %{
@@ -35,7 +32,7 @@ define-command -hidden -params 1 cache-password %{
     }
 }
 
-def sudo-write -docstring "Write the content of the buffer using sudo" %{
+define-command sudo-write -docstring "Write the content of the buffer using sudo" %{
     %sh{
         # check if the password is cached
         if sudo -n true > /dev/null 2>&1; then
