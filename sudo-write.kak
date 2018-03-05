@@ -12,7 +12,7 @@ define-command -hidden sudo-write-impl %{
             else
                 echo "echo -markup '{Error}Something went wrong'"
             fi
-            rm -f "$kak_opt_sudo_write_tmp"
+            rm -f "$kak_reg_f"
         }
     }
 }
