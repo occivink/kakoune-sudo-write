@@ -18,7 +18,7 @@ define-command -hidden sudo-write-impl %{
 }
 
 define-command -hidden -params 1 cache-password %{
-    eval -no-hooks -draft %{
+    eval -draft %{
         edit -scratch *sudo_write_pass*
         reg '"' %arg{1}
         exec "<a-p>|sudo -S echo ok<ret>"
