@@ -3,6 +3,7 @@
 
 define-command -hidden sudo-write-impl %{
     eval -save-regs f %{
+        # TOOD this could take the content of the buffer from stdin instead
         reg f %sh{ mktemp --tmpdir XXXXX }
         write %reg{f}
         eval %sh{
@@ -18,17 +19,20 @@ define-command -hidden sudo-write-impl %{
 }
 
 define-command -hidden -params 1 sudo-cache-password %{
-    eval -save-regs '"' -no-hooks -draft %{
-        edit -scratch *sudo_write_pass*
-        reg '"' %arg{1}
-        exec "<a-p>|sudo -S echo ok<ret>"
-        try %{
-            exec <a-k>ok<ret>
-            delete-buffer
-        } catch %{
-            delete-buffer
-            fail
+    eval -no-hooks -save-regs '"c' %{
+        eval -draft %{
+            edit -scratch *sudo-write-pass*
+            reg '"' %arg{1}
+            exec "<a-p>|sudo -S echo ok<ret>"
+            try %{
+                exec '%H<a-k>ok<ret>'
+                reg c nop
+            } catch %{
+                reg c fail
+            }
         }
+        delete-buffer *sudo-write-pass*
+        eval %reg{c}
     }
 }
 
