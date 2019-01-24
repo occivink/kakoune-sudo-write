@@ -10,8 +10,6 @@ Add `sudo-write.kak` to your autoload dir: `~/.config/kak/autoload/`, or source 
 
 Call the `sudo-write` command. If your password has not been cached by `sudo`, you will be prompted to input it. Upon success, the buffer is written to the file.
 
-Note that the plugin will not work if you do not use any cache for `sudo`.
-
 **Warning**: while the input is hidden, the password is still passed through stdin to `sudo`. Do not use this plugin if you are not comfortable with this idea.
 
 ## License
