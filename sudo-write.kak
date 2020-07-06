@@ -4,7 +4,7 @@
 define-command -hidden sudo-write-cached-password %{
     # easy case: the password was already cached, so we don't need any tricky handling
     eval -save-regs f %{
-        reg f %sh{ mktemp --tmpdir XXXXX }
+        reg f %sh{ mktemp -t XXXXXX }
         write %reg{f}
         eval %sh{
             sudo -n -- dd if="$kak_main_reg_f" of="$kak_buffile" >/dev/null 2>&1
@@ -23,7 +23,7 @@ define-command -hidden sudo-write-prompt-password %{
         eval -save-regs r %{
             eval -draft -save-regs 'tf|"' %{
                 reg t %val{buffile}
-                reg f %sh{ mktemp --tmpdir XXXXX }
+                reg f %sh{ mktemp -t XXXXXX }
                 write %reg{f}
 
                 # write the password in a buffer in order to pass it through STDIN to sudo
