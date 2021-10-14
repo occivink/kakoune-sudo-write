@@ -69,3 +69,65 @@ define-command sudo-write -docstring "Write the content of the buffer using sudo
     }
 }
 
+# SAME AS ABOVE WITH 'QUIT' APPENEDED
+
+define-command -hidden sudo-write-quit-cached-password %{
+    eval -save-regs f %{
+        reg f %sh{ mktemp -t XXXXXX }
+        write! %reg{f}
+        eval %sh{
+            sudo -n -- dd if="$kak_main_reg_f" of="$kak_buffile" >/dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                echo "edit!"
+            else
+                echo 'fail "Unknown failure"'
+            fi
+            rm -f "$kak_main_reg_f"
+        }
+    }
+    quit
+}
+
+define-command -hidden sudo-write-quit-prompt-password %{
+    prompt -password 'Password:' %{
+        eval -save-regs r %{
+            eval -draft -save-regs 'tf|"' %{
+                reg t %val{buffile}
+                reg f %sh{ mktemp -t XXXXXX }
+                write! %reg{f}
+                edit -scratch '*sudo-password-tmp*'
+                reg '"' "%val{text}"
+                exec <a-P>
+                reg | %{
+                    sudo -S -- dd if="$kak_main_reg_f" of="$kak_main_reg_t" > /dev/null 2>&1
+                    if [ $? -eq 0 ]; then
+                        printf 'edit!'
+                    else
+                        printf 'fail "Incorrect password?"'
+                    fi
+                    rm -f "$kak_main_reg_f"
+                }
+                exec '|<ret>'
+                exec -save-regs '' '%"ry'
+                delete-buffer! '*sudo-password-tmp*'
+            }
+            eval %reg{r}
+        }
+        quit
+    }
+}
+
+define-command sudo-write-quit -docstring "Write the content of the buffer using sudo, then quit" %{
+    eval %sh{
+        if [ "${kak_buffile%"${kak_buffile#?}"}" != "/" ]; then
+            printf 'fail "Not a file"'
+            exit
+        fi
+        if sudo -n true > /dev/null 2>&1; then
+            printf sudo-write-quit-cached-password
+        else
+            printf sudo-write-quit-prompt-password
+        fi
+    }
+}
+
